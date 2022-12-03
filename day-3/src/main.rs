@@ -38,12 +38,13 @@ use std::fs;
 
 fn main() {
     let contents = fs::read_to_string("../input.txt").expect("Input read");
+    // Beginning of part 1
     // Process the input
     let total_prio = contents.split("\n").fold(0, |acc, backpack| -> u32 {
         let mut repeated_item_index: usize = 0;
         let mut i = 0;
         let mut j = backpack.chars().count() / 2;
-        println!("Length is {:?}, half point is {:?}", backpack.chars().count(), backpack.chars().count() / 2);
+        
         // Find the repeated char
         while i != j {
             if backpack.chars().nth(i).unwrap() == backpack.chars().nth(j).unwrap() {
@@ -61,7 +62,7 @@ fn main() {
 
         // Substract the value needed to normalise the value
         let priority: u32 = if ascii_value >= 65 && ascii_value <= 90 {
-            ascii_value - 38 
+            ascii_value - 38
         } else {
            ascii_value - 96
         };
@@ -76,6 +77,46 @@ fn main() {
         return acc + priority;
     });
 
-
     println!("Total priority of items is {total_prio:?}");
+
+    // End of part 1
+
+    // Begining of part 2
+
+    // Process the input
+    let backpacks: Vec<&str> = contents.split("\n").collect();
+
+    let mut backprios: u32 = 0;
+
+    for index in 0..(backpacks.len() / 3) {
+        let mut ascii_value: u32 = 0;
+        let mut backpack1: Vec<char> = backpacks.get(index * 3).unwrap().chars().collect();
+        backpack1.dedup();
+        backpack1.sort();
+        let mut backpack2: Vec<char> = backpacks.get((index * 3) + 1).unwrap().chars().collect();
+        backpack2.dedup();
+        backpack2.sort();
+        let mut backpack3: Vec<char> = backpacks.get((index * 3) + 2).unwrap().chars().collect();
+        backpack3.dedup();
+        backpack3.sort();
+
+        for ele in backpack1 {
+            if backpack2.contains(&ele) && backpack3.contains(&ele) {
+                ascii_value = ele as u32;
+                println!("Badge is {:?} ", ele);
+                break;
+            }
+        }
+        let priority: u32 = if ascii_value >= 65 && ascii_value <= 90 {
+            ascii_value - 38
+        } else {
+            ascii_value - 96
+        };
+
+        println!("Priority is {:?}", priority);
+        backprios += priority;
+    }
+
+    println!("Total prio of badges {:?}", backprios);
+    // End of part 2
 }
