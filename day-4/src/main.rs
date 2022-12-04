@@ -49,6 +49,7 @@ In how many assignment pairs does one range fully contain the other?
 */
 fn main() {
     let contents = fs::read_to_string("../input.txt").expect("Input read");
+    // Beginning of part 1
     let total_pairs_containing = contents.split("\n").fold(0, |acc, pair| -> u32 {
         // ["2-4,6-8", "2-3,4-5", "6-6,4-6"]
         let split_groups: Vec<u32> = pair
@@ -69,5 +70,36 @@ fn main() {
     println!(
         "Pairs where a group contains the other {:?}",
         total_pairs_containing,
+    );
+    // End of part 1
+
+    // Begining of part 2
+    let total_pairs_overlapping = contents.split("\n").fold(0, |acc, pair| -> u32 {
+        // ["2-4,6-8", "2-3,4-5", "6-6,4-6", "2-6,4-8"]
+        let split_groups: Vec<u32> = pair
+            .split([',', '-'])
+            // [["2","4", "6", "8"], ["2","3","4","5"], ["6", "6", "4", "6"], ["2", "6", "4", "8"]]
+            .map(|val| val.parse().unwrap())
+            .collect();
+        /*
+            If the end of the first group is after the beginning of the second group
+            and before the end of the second group,
+            or the end of the second group is after the beginning of the first group
+            and before the end of the first group
+        */
+        if (split_groups[1] >= split_groups[2] && split_groups[1] <= split_groups[3])
+            || (split_groups[3] >= split_groups[0] && split_groups[3] <= split_groups[1])
+        {
+            println!("Overlapping group is {:?}", pair);
+            return acc + 1;
+        }
+        return acc;
+    });
+    println!(
+        "Pairs where a group overlaps the other {:?}",
+        total_pairs_overlapping,
     )
+
+    // End of part 2
+    // 895
 }
