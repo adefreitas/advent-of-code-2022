@@ -32,6 +32,24 @@ fn main() {
         }
     }
 
+    let moves_separator = Regex::new(r"(move\s)|(\sfrom\s)|(\sto\s)").unwrap();
+
+    // Will be [0] = amount, [1] = origin, [2] = destination
+    let moves: Vec<Vec<u32>> = split_content[1]
+        .split("\n")
+        .into_iter()
+        .map(|row| {
+            return moves_separator
+                .split(row)
+                .filter(|thing| -> bool { thing.len() > 0 })
+                .map(|thing| -> u32 {
+                    return thing.parse::<u32>().unwrap();
+                })
+                .collect();
+        })
+        .collect();
+
     println!("{:?}", initial_state);
     println!("{:?}", rotated_state);
+    println!("{:?}", moves);
 }
