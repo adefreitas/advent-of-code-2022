@@ -49,16 +49,41 @@ fn main() {
         })
         .collect();
 
+    // Beginning of part 1
+    // for moe in moves {
+    //     // println!("{:?}", moe);
+    //     for _i in 0..moe[0] {
+    //         let val = rotated_state[moe[1] - 1].pop();
+    //         if val.is_some() {
+    //             rotated_state[moe[2] - 1].push(val.unwrap());
+    //         }
+    //     }
+    // }
+
+    // println!("{:?}", rotated_state);
+
+    // rotated_state
+    //     .iter()
+    //     .for_each(|item| print!("{:?}", item.last().unwrap()));
+
+    // End of part 1
+
+    // Beginning of part 2
+
     for moe in moves {
         // println!("{:?}", moe);
+        let mut to_move = vec![];
         for _i in 0..moe[0] {
             let val = rotated_state[moe[1] - 1].pop();
             if val.is_some() {
-                rotated_state[moe[2] - 1].push(val.unwrap());
+                to_move.push(val.unwrap());
             }
         }
+        to_move.reverse();
+        rotated_state[moe[2] - 1].append(&mut to_move);
     }
 
+    // End of part 2
     println!("{:?}", rotated_state);
 
     rotated_state
