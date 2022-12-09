@@ -1,17 +1,4 @@
-use std::{
-    borrow::Borrow,
-    cell::{Ref, RefCell},
-    collections::HashSet,
-    fs,
-    rc::Rc,
-};
-
-// struct Directory<'a> {
-//     parent: &'a Directory<'a>,
-//     size: u32,
-//     name: &'a str,
-//     children: Vec<Directory<'a>>,
-// }
+use std::{borrow::Borrow, cell::RefCell, fs, rc::Rc};
 
 struct Node<'a> {
     pub size: Option<u32>,
@@ -22,28 +9,19 @@ struct Node<'a> {
 
 fn main() {
     let contents = fs::read_to_string("./input.txt").expect("Input read");
-    println!("Input {:?}", contents);
 
     let root_node = Rc::new(RefCell::new(Node {
-        // parent: ,
         name: "/",
         size: None,
         children: vec![],
         parent: None,
     }));
-    // let root_node = Node {
-    //     // parent: ,
-    //     name: "/",
-    //     size: None,
-    //     children: HashSet::new(),
-    //     parent: None,
-    // };
     let mut current_node = Rc::clone(&root_node);
 
-    let split_contents: Vec<Vec<Vec<&str>>> = contents
+    contents
         .split("$")
         .filter(|line| !line.is_empty())
-        .map(|execution| {
+        .for_each(|execution| {
             let command: Vec<Vec<&str>> = execution
                 .split("\n")
                 .map(|line| {
@@ -80,23 +58,58 @@ fn main() {
                 }
             }
 
-            return command;
-        })
-        .collect();
-
-    println!("Parsed? input {:?}", split_contents);
-
-    let total_size: u32 = 0;
-
-    // get_total_size(&root_node.);
+            if command[0][0] == "ls" {
+                println!("Listing elements in directory {:?}", command);
+                for index in 1..command.len() {
+                    println!("Command {:?}", command[index]);
+                    if command[index][0] == "dir" {
+                        println!("{:?} is a dir, creating node", command[index][1]);
+                        let node = Rc::new(RefCell::new(Node {
+                            name: command[index][1],
+                            size: None,
+                            children: vec![],
+                            parent: Option::Some(Rc::clone(&current_node)),
+                        }));
+                        current_node.as_ref().borrow_mut().children.push(node);
+                        // println!("Node {:?}", node.as_ref().borrow_mut().name);
+                    } else {
+                        println!(
+                            "{:?} is a file, creating node with no children",
+                            command[index][1]
+                        );
+                        let node = Rc::new(RefCell::new(Node {
+                            name: command[index][1],
+                            size: Option::Some(command[index][0].parse::<u32>().unwrap()),
+                            children: vec![],
+                            parent: Option::Some(Rc::clone(&current_node)),
+                        }));
+                        current_node.as_ref().borrow_mut().children.push(node);
+                        // println!("Node {:?}", node.as_ref().borrow_mut().name);
+                    }
+                }
+            }
+        });
+    let total_size = get_total_size(&root_node);
     println!("Total size {:?}", total_size);
 }
 
-fn get_total_size(node: &Node) -> u32 {
-    if node.size.unwrap_or_default() != 0 {
-        return node.size.unwrap();
+fn get_total_size(node: &Rc<RefCell<Node>>) -> u32 {
+    let cloned_node = Rc::clone(node);
+    let borrowed_mut = cloned_node.as_ref().borrow_mut();
+    let size = borrowed_mut.size.unwrap_or_default();
+    if size != 0 {
+        println!("Size for {:?} is {:?}", borrowed_mut.name, size);
+        return size;
     }
-    return node.children.iter().fold(0, |acc, inner_dir| {
-        return acc + get_total_size(inner_dir.as_ref().borrow().borrow());
+
+    let dir_size = borrowed_mut.children.iter().fold(0, |acc, inner_dir| {
+        return acc + get_total_size(inner_dir);
     });
+    if borrowed_mut.size.borrow().is_none() {
+        println!(
+            "Directory {:?} is of size {:?}",
+            borrowed_mut.name, dir_size
+        );
+    }
+    return dir_size;
 }
